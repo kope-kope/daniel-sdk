@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <link rel="icon" href="./icons/favicon-16x16.png" sizes="16x16" type="image/png" />
+  <link rel="icon" href="./icons/favicon-32x32.png" sizes="32x32" type="image/png" />
+  <link rel="stylesheet" href="./style.css" />
+  <script type="text/javascript" src="../assets/js/jquery.js"></script>
+  <script type="text/javascript" src="../assets/js/jquery.inputmask.js"></script>
+  <title>Gamma Demo</title>
+  <style>
+    body {
+      background-image: url(Frame.svg);
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+  </style>
+</head>
+
+<body style="height: 100vh; display: flex">
+  <main class="m-auto">
+    <div class="container-md" style="width: 600px; max-width: 80%">
+      <div class="row">
+        <div class="col">
+          <div class="card card-bleed shadow-light-lg mb-6">
+            <div class="card-header">
+              <div class="row">
+                <div class="col-auto">
+                  <img src="logo.png" />
+                </div>
+                <div class="col">
+                  <h3 class="text-dark m-0">
+                    <strong>Payment <br />
+                      Demo</strong>
+                  </h3>
+                </div>
+              </div>
+            </div>
+            <img src="line.png" />
+            <div class="card-body">
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input class="form-control" placeholder="you@email.com" type="email" id="email" required
+                  data-title="Email address" />
+              </div>
+              <div class="form-group">
+                <label for="amount">Amount</label>
+                <input id="amount" class="form-control"
+                  data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
+                  inputmode="numeric" data-title="Amount" />
+              </div>
+              <div class="form-group">
+                <label for="full-name">Full Name</label>
+                <input class="form-control" placeholder="Adetayo Chukwu" type="text" id="fullName"
+                  data-title="Fullname" />
+              </div>
+              <div class="form-group">
+                <label for="first-name">Phone Number</label>
+                <input class="form-control" placeholder="0808080" type="number" id="phoneNumber"
+                  data-title="Phonenumber" />
+              </div>
+              <input type="hidden" id="callback" />
+              <div class="text-center">
+                <pay-with-woven data-title="Pay with Gamma" id="pay-with-gamma" theme="black" onclick="callGamma()" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="https://js.woven.finance"></script>
+
+</body>
+<script>
+  function callGamma() {
+    let amt = $("#amount").inputmask('unmaskedvalue');
+    var gamma = Gamma.setup({
+      // key: "vb_tk_1edec0375649aa260d317c13",
+      key: "vb_lk_d94c8a03f05cdd9548a21052",
+      email: document.getElementById("email").value,
+      amount: parseInt(parseFloat(amt) * 100),
+      customer_name: document.getElementById("fullName").value,
+      mobile_number: document.getElementById("phoneNumber").value,
+      ref: "Demo" + document.getElementById("phoneNumber").value,
+      narration: "Demo payment",
+      sub_account: "1990020884",
+      callback: function (ref) {
+        console.log(ref);
+        alert("Thanks for trying this out");
+      },
+      onClose: function () {
+        console.log("Gamma pop closed");
+      },
+      metadata: JSON.parse(localStorage.getItem("metadata")),
+      call_back_url:"https://webhook.site/1117ea53-a901-4deb-b356-c37c6c024fad"
+    });
+    gamma.pop();
+  }
+  $(document).ready(function () {
+    $(":input").inputmask({ rightAlign: false });
+    localStorage.clear()
+    let metadata = {
+      starttime: new Date(),
+      history: []
+    }
+    $("input, select").change((ev) => {
+      element = ev.target;
+      metadata.history.push({
+        narration: "Filled this field: " + $(element).attr("data-title"),
+        type: "log",
+        timestamp: new Date(),
+        data: {
+          value: $(element).val()
+        }
+      })
+      localStorage.setItem("metadata", JSON.stringify(metadata))
+    })
+    $("button").click((ev) => {
+      element = ev.target;
+      name = "";
+      if ($(element).attr("data-title") == undefined) {
+        name = $(element).closest("pay-with-woven").attr('data-title');
+      } 
+      else {
+        name = $(element).attr("data-title")
+      }
+        metadata.history.push({
+          narration: "Clicked this button: " + name,
+          type: "log",
+          timestamp: new Date(),
+          data: {
+            value: $(element).val()
+          }
+        })
+        localStorage.setItem("metadata", JSON.stringify(metadata))
+    });
+  });
+</script>
+
+</html>
